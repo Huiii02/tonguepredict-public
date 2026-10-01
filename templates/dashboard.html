@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CardioLingua AI — Mobile Diagnostic Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #0284c7;
+            --bg-light: #f8fafc;
+            --card-border: #e2e8f0;
+        }
+        body {
+            background-color: #cbd5e1;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        /* Mobile Phone Container Frame */
+        .mobile-frame {
+            width: 100%;
+            max-width: 412px;
+            height: 870px;
+            background: #ffffff;
+            border-radius: 36px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            border: 8px solid #0f172a;
+        }
+        .app-header {
+            padding: 15px 20px;
+            background: #ffffff;
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .screen { display: none; height: 100%; overflow-y: auto; padding: 20px; }
+        .screen.active { display: block; }
+        
+        .card-custom {
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 16px;
+            background: #ffffff;
+            margin-bottom: 15px;
+        }
+        .btn-primary-custom {
+            background: var(--primary-blue);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 12px;
+            font-weight: 600;
+            width: 100%;
+        }
+        .nav-tabs-custom {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 15px;
+        }
+        .nav-tabs-custom button {
+            flex: 1;
+            border: none;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            background: transparent;
+            color: #64748b;
+        }
+        .nav-tabs-custom button.active {
+            background: #ffffff;
+            color: var(--primary-blue);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .pipeline-step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.9rem;
+        }
+        .score-box {
+            background: #f97316;
+            color: white;
+            border-radius: 16px;
+            padding: 25px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="mobile-frame">
+    <!-- Header -->
+    <div class="app-header">
+        <div class="d-flex align-items-center gap-2">
+            <i class="fa-solid fa-heart-pulse text-primary fs-5"></i>
+            <span class="fw-bold fs-6">CardioLingua AI</span>
+        </div>
+        <span class="badge bg-light text-dark border">v2.4</span>
+    </div>
+
+    <!-- 1. AUTHENTICATION SCREEN -->
+    <div id="screen-auth" class="screen active">
+        <div class="text-center my-4">
+            <h4 class="fw-bold">Clinician Portal</h4>
+            <p class="text-muted small">Sign in to access CAD decision support</p>
+        </div>
+        <div class="card-custom">
+            <div class="mb-3">
+                <label class="form-label small fw-semibold">Username</label>
+                <input type="text" class="form-control" value="dr_liew">
+            </div>
+            <div class="mb-3">
+                <label class="form-label small fw-semibold">Password</label>
+                <input type="password" class="form-control" value="••••••••">
+            </div>
+            <button class="btn-primary-custom" onclick="navigateTo('screen-patient')">Login to System</button>
+        </div>
+    </div>
+
+    <!-- 2. PATIENT PROFILE SCREEN (Matches Figure 4.7) -->
+    <div id="screen-patient" class="screen">
+        <h5 class="fw-bold mb-3">Patient Management</h5>
+        
+        <div class="nav-tabs-custom">
+            <button class="active" onclick="togglePatientTab('existing')"><i class="fa-solid fa-users me-1"></i> Patients</button>
+            <button onclick="togglePatientTab('new')"><i class="fa-solid fa-user-plus me-1"></i> New Patient</button>
+        </div>
+
+        <!-- Existing Patients Tab -->
+        <div id="tab-existing">
+            <div class="card-custom d-flex align-items-center justify-content-between" onclick="selectPatient('John Smith', '58 yrs • Male')">
+                <div>
+                    <h6 class="fw-bold mb-0">John Smith</h6>
+                    <span class="text-muted small">58 yrs • Male • Hypertension</span>
+                </div>
+                <i class="fa-solid fa-chevron-right text-muted"></i>
+            </div>
+            <div class="card-custom d-flex align-items-center justify-content-between" onclick="selectPatient('Sarah Johnson', '62 yrs • Female')">
+                <div>
+                    <h6 class="fw-bold mb-0">Sarah Johnson</h6>
+                    <span class="text-muted small">62 yrs • Female • Dyslipidemia</span>
+                </div>
+                <i class="fa-solid fa-chevron-right text-muted"></i>
+            </div>
+        </div>
+
+        <!-- New Patient Tab -->
+        <div id="tab-new" class="d-none">
+            <div class="card-custom">
+                <div class="mb-2">
+                    <label class="form-label small">Full Name *</label>
+                    <input type="text" id="new-name" class="form-control form-control-sm" placeholder="e.g. John Smith">
+                </div>
+                <div class="row g-2 mb-2">
+                    <div class="col-6">
+                        <label class="form-label small">Age *</label>
+                        <input type="number" id="new-age" class="form-control form-control-sm" placeholder="58">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small">Gender *</label>
+                        <select id="new-gender" class="form-select form-control-sm">
+                            <option>Male</option>
+                            <option>Female</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn-primary-custom mt-2" onclick="createAndSelectPatient()">Create & Select Profile</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. DIAGNOSTIC UPLOAD SCREEN (Matches Figure 4.8) -->
+    <div id="screen-upload" class="screen">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <button class="btn btn-sm btn-light" onclick="navigateTo('screen-patient')"><i class="fa-solid fa-arrow-left"></i></button>
+            <h6 class="fw-bold mb-0">Diagnostic Upload</h6>
+            <div></div>
+        </div>
+
+        <div class="card-custom text-center bg-light">
+            <span class="badge bg-primary mb-1" id="active-patient-tag">Patient: John Smith</span>
+        </div>
+
+        <div class="card-custom text-center py-4" onclick="document.getElementById('file-input').click()" style="cursor:pointer; border-style:dashed;">
+            <i class="fa-solid fa-cloud-arrow-up text-primary fs-1 mb-2"></i>
+            <h6 class="fw-bold">Upload Tongue Image</h6>
+            <span class="text-muted small">Tap to browse image file</span>
+            <input type="file" id="file-input" class="d-none" accept="image/*" onchange="previewFile(this)">
+            <img id="upload-preview" class="img-fluid rounded mt-2 d-none" style="max-height:140px;">
+        </div>
+
+        <div class="card-custom">
+            <span class="text-muted small fw-bold d-block mb-2">ANALYSIS PIPELINE</span>
+            <div class="pipeline-step"><i class="fa-solid fa-crop-simple text-secondary"></i> Image Preprocessing</div>
+            <div class="pipeline-step"><i class="fa-solid fa-scissors text-secondary"></i> Tongue Segmentation (SAM)</div>
+            <div class="pipeline-step"><i class="fa-solid fa-network-wired text-secondary"></i> Feature Extraction (ResNet-50)</div>
+            <div class="pipeline-step"><i class="fa-solid fa-brain text-secondary"></i> Hybrid Model Prediction</div>
+        </div>
+
+        <button class="btn-primary-custom" id="exec-btn" onclick="runDiagnostic()" disabled>Execute Assessment →</button>
+    </div>
+
+    <!-- 4. OVERALL RESULT SCREEN (Matches Figure 4.9) -->
+    <div id="screen-result" class="screen">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <button class="btn btn-sm btn-light" onclick="navigateTo('screen-upload')"><i class="fa-solid fa-arrow-left"></i></button>
+            <h6 class="fw-bold mb-0">Risk Analytics</h6>
+            <button class="btn btn-sm btn-light" onclick="navigateTo('screen-patient')"><i class="fa-solid fa-house"></i></button>
+        </div>
+
+        <!-- Overall Score Card -->
+        <div class="score-box mb-3" id="score-card">
+            <span class="small opacity-75 d-block">Overall CAD Risk Score</span>
+            <h1 class="display-3 fw-bold my-1" id="res-risk-pct">68%</h1>
+            <span class="badge bg-white text-dark px-3 py-1 rounded-pill" id="res-risk-label">Moderate Risk</span>
+        </div>
+
+        <!-- Model Confidence Metrics -->
+        <div class="card-custom">
+            <span class="fw-bold small d-block mb-2"><i class="fa-solid fa-sliders me-1"></i> Model Confidence Breakdown</span>
+            <div class="d-flex justify-content-between small py-1">
+                <span>CNN Accuracy</span>
+                <strong id="m-cnn">94.2%</strong>
+            </div>
+            <div class="d-flex justify-content-between small py-1">
+                <span>Random Forest</span>
+                <strong id="m-rf">91.8%</strong>
+            </div>
+            <div class="d-flex justify-content-between small py-1 border-top pt-1">
+                <span>Hybrid Ensemble</span>
+                <strong class="text-primary" id="m-hybrid">96.5%</strong>
+            </div>
+        </div>
+
+        <!-- Clinical Indicators -->
+        <div class="card-custom">
+            <span class="fw-bold small d-block mb-2"><i class="fa-solid fa-heart-pulse me-1"></i> Clinical Indicators</span>
+            <div class="d-flex justify-content-between align-items-center py-1">
+                <span class="small">Circulation Markers</span>
+                <span class="badge bg-danger">Poor</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center py-1">
+                <span class="small">Metabolic Indicators</span>
+                <span class="badge bg-warning text-dark">Moderate</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedPatientName = "John Smith";
+    let selectedPatientGender = "Male";
+    let selectedFile = null;
+
+    function navigateTo(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+    }
+
+    function togglePatientTab(tab) {
+        document.querySelectorAll('.nav-tabs-custom button').forEach(b => b.classList.remove('active'));
+        if (tab === 'existing') {
+            document.getElementById('tab-existing').classList.remove('d-none');
+            document.getElementById('tab-new').classList.add('d-none');
+            event.target.classList.add('active');
+        } else {
+            document.getElementById('tab-existing').classList.add('d-none');
+            document.getElementById('tab-new').classList.remove('d-none');
+            event.target.classList.add('active');
+        }
+    }
+
+    function selectPatient(name, info) {
+        selectedPatientName = name;
+        document.getElementById('active-patient-tag').innerText = "Patient: " + name;
+        navigateTo('screen-upload');
+    }
+
+    function createAndSelectPatient() {
+        const name = document.getElementById('new-name').value || "New Patient";
+        selectedPatientName = name;
+        document.getElementById('active-patient-tag').innerText = "Patient: " + name;
+        navigateTo('screen-upload');
+    }
+
+    function previewFile(input) {
+        if (input.files && input.files[0]) {
+            selectedFile = input.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.getElementById('upload-preview');
+                img.src = e.target.result;
+                img.classList.remove('d-none');
+                document.getElementById('exec-btn').disabled = false;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    async function runDiagnostic() {
+        if (!selectedFile) return;
+
+        const formData = new FormData();
+        formData.append('file', selectedFile);
+        formData.append('patient_name', selectedPatientName);
+
+        document.getElementById('exec-btn').innerText = "Running SAM & ResNet-50...";
+
+        try {
+            const response = await fetch('/predict', { method: 'POST', body: formData });
+            const data = await response.json();
+
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+
+            // Update Result Screen Metrics
+            document.getElementById('res-risk-pct').innerText = data.risk_percentage + "%";
+            document.getElementById('res-risk-label').innerText = data.risk_level;
+            
+            const scoreCard = document.getElementById('score-card');
+            if (data.prediction_code === 1) {
+                scoreCard.style.background = "#ef4444"; // Red for High CAD Risk
+            } else {
+                scoreCard.style.background = "#10b981"; // Green for Healthy
+            }
+
+            document.getElementById('exec-btn').innerText = "Execute Assessment →";
+            navigateTo('screen-result');
+
+        } catch (err) {
+            alert("Execution error. Ensure app.py is running.");
+            document.getElementById('exec-btn').innerText = "Execute Assessment →";
+        }
+    }
+</script>
+</body>
+</html>
